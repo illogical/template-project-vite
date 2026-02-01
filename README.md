@@ -1,73 +1,160 @@
-# React + TypeScript + Vite
+# Bun + Vite + React Starter Template
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A production-ready starter template with Bun runtime, Vite build tool, React 19, TypeScript, Elysia API server, and styled-components.
 
-Currently, two official plugins are available:
+## Tech Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Runtime**: [Bun](https://bun.sh)
+- **Build Tool**: [Vite](https://vite.dev) with SWC
+- **Frontend**: [React 19](https://react.dev) + TypeScript
+- **Styling**: [styled-components](https://styled-components.com)
+- **API Server**: [Elysia](https://elysiajs.com) (Bun-native, type-safe)
+- **Testing**: [Vitest](https://vitest.dev) + React Testing Library
+- **Linting**: ESLint + Prettier
 
-## React Compiler
+## Getting Started
 
-The React Compiler is currently not compatible with SWC. See [this issue](https://github.com/vitejs/vite-plugin-react/issues/428) for tracking the progress.
+### Prerequisites
 
-## Expanding the ESLint configuration
+- [Bun](https://bun.sh) (v1.0+)
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Installation
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+bun install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Development
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Start both frontend and API servers:
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+bun run dev:all
 ```
+
+Or run them separately:
+
+```bash
+# Frontend only (http://localhost:5173)
+bun run dev
+
+# API only (http://localhost:3001)
+bun run dev:api
+```
+
+### Testing
+
+```bash
+# Run all tests (frontend + backend)
+bun run test
+
+# Run tests with UI
+bun run test:ui
+```
+
+### Build
+
+```bash
+bun run build
+```
+
+### Preview Production Build
+
+```bash
+bun run preview
+```
+
+## Available Scripts
+
+| Script | Description |
+|--------|-------------|
+| `dev` | Start Vite dev server |
+| `dev:api` | Start Elysia API server with hot reload |
+| `dev:all` | Start both frontend and API servers |
+| `build` | Type check and build for production |
+| `preview` | Preview production build |
+| `test` | Run tests with Vitest |
+| `test:ui` | Run tests with Vitest UI |
+| `lint` | Lint code with ESLint |
+| `format` | Format code with Prettier |
+| `format:check` | Check code formatting |
+
+## Project Structure
+
+```
+/
+├── api/                    # Elysia API server
+│   ├── index.ts           # Server entry point
+│   └── routes/            # Route modules
+├── shared/                # Shared types (client/server)
+│   └── types.ts
+├── src/                   # React frontend
+│   ├── components/        # React components
+│   ├── App.tsx           # Main component
+│   └── main.tsx          # Entry point
+├── tests/                 # Test files
+│   ├── App.test.tsx      # Frontend tests
+│   └── api/              # Backend tests
+├── vite.config.ts        # Vite + Vitest config
+├── tsconfig.json         # TypeScript config
+└── package.json
+```
+
+## API Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/hello` | GET | Returns greeting message |
+| `/api/health` | GET | Health check endpoint |
+
+## Development Notes
+
+### Proxy Configuration
+
+During development, the Vite dev server proxies `/api` requests to the Elysia server running on port 3001. This is configured in `vite.config.ts`.
+
+### Adding New API Routes
+
+1. Create a route module in `api/routes/`:
+
+```typescript
+// api/routes/users.ts
+import { Elysia } from 'elysia'
+
+export const userRoutes = new Elysia({ prefix: '/api/users' })
+  .get('/', () => ({ users: [] }))
+  .get('/:id', ({ params }) => ({ id: params.id }))
+```
+
+2. Import and use in `api/index.ts`:
+
+```typescript
+import { userRoutes } from './routes/users'
+
+export const app = new Elysia()
+  .use(cors())
+  .use(userRoutes)
+  // ... other routes
+```
+
+### Shared Types
+
+Define types in `shared/types.ts` for type-safe API contracts between frontend and backend:
+
+```typescript
+// shared/types.ts
+export interface User {
+  id: string
+  name: string
+}
+
+// Use in API
+app.get('/api/users/:id', ({ params }): User => ({ ... }))
+
+// Use in frontend
+const user = await fetch('/api/users/1').then(r => r.json()) as User
+```
+
+## License
+
+MIT
