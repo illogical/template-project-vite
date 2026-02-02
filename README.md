@@ -155,6 +155,14 @@ app.get('/api/users/:id', ({ params }): User => ({ ... }))
 const user = await fetch('/api/users/1').then(r => r.json()) as User
 ```
 
+## Documentation
+
+- **[Coding Standards](docs/CODING_STANDARDS.md)** - Comprehensive coding standards for this architecture
+- **[Setup Guide](docs/SETUP_GUIDE.md)** - Step-by-step project setup and feature addition guide
+- **[Code Examples](docs/examples/)** - Working code samples demonstrating key patterns
+
+These standards are automatically generated from the template patterns using the `template-vite-standards` Claude Code skill.
+
 ## License
 
 MIT
